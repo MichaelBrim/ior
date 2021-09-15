@@ -396,6 +396,29 @@ PKG_CHECK_MODULES([FINCHFS], [finchfs],
   [with_finchfs=no])
 AM_CONDITIONAL([USE_FINCHFS_AIORI], [test x$with_finchfs != xno])
 
+# UnifyFS support
+AC_MSG_CHECKING([for UnifyFS file system])
+AC_ARG_WITH([unifyfs],
+  [AS_HELP_STRING([--with-unifyfs],
+    [support IO with UnifyFS backend @<:@default=no@:>@])],
+  [], [with_unifyfs=no])
+AC_MSG_RESULT([$with_unifyfs])
+AM_CONDITIONAL([USE_UNIFYFS_AIORI], [test x$with_unifyfs != xno])
+AS_IF([test "x$with_unifyfs" != xno], [
+    UNIFY="yes"
+    case x$with_unifyfs in
+      xyes) ;;
+      *)
+      CPPFLAGS="$CPPFLAGS -I$with_unifyfs/include"
+      LDFLAGS="$LDFLAGS -L$with_unifyfs/lib" ;;
+    esac
+    AC_CHECK_LIB([unifyfs_api], [unifyfs_initialize],, [unset UNIFY, AC_MSG_ERROR([libunifyfs_api not found])])
+])
+AM_CONDITIONAL([USE_UNIFYFS_AIORI], [test x$UNIFY = xyes])
+AM_COND_IF([USE_UNIFYFS_AIORI],[
+  AC_DEFINE([USE_UNIFYFS_AIORI], [], [Build UnifyFS backend AIORI])
+])
+
 # aws4c is needed for the S3 backend (see --with-S3, below).
 # Version 0.5.2 of aws4c is available at https://github.com/jti-lanl/aws4c.git
 # Install it something like this:
@@ -524,7 +547,6 @@ AC_COMPILE_IFELSE(
       }
   ]])],
   AC_DEFINE([HAVE_GETCPU_SYSCALL], [], [Has syscall to detect CPU socket ID]))
-
 
 # Enable building "IOR", in all capitals
 AC_ARG_ENABLE([caps],

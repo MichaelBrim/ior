@@ -146,6 +146,11 @@ if WITH_LUSTRE
 extraLDADD  += -llustreapi
 endif
 
+if USE_UNIFYFS_AIORI
+extraSOURCES += aiori-UnifyFS.c
+extraLDADD += -lunifyfs_api
+endif
+
 ior_SOURCES  += $(extraSOURCES)
 ior_LDFLAGS  += $(extraLDFLAGS)
 ior_LDADD    += $(extraLDADD)
